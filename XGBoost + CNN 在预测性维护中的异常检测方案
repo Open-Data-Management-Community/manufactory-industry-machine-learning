@@ -1,0 +1,129 @@
+在预测性维护中，XGBoost 和 CNN（卷积神经网络） 的结合主要用于 设备故障预测和异常检测。XGBoost 适用于结构化数据（如传感器数据），而 CNN 适用于非结构化数据（如振动信号、音频、图像），两者结合能够提高模型的准确性和泛化能力。
+
+1. 为什么使用 XGBoost + CNN
+GBoost + CNN	结合结构化与非结构化数据	提高模型准确性，能同时处理传感器数据与振动信号	计算复杂度较高
+
+应用场景：
+	•	预测性维护（监测电机、电缆、门系统故障）
+	•	工业设备健康监测（识别异常振动模式）
+	•	电机故障检测（基于振动、声音、温度数据）
+
+2. 方案架构
+
+完整的 XGBoost + CNN 预测性维护架构如下：
+	1.	数据采集
+	•	结构化数据：电流、电压、温度、震动幅度、历史故障记录
+	•	非结构化数据：
+	•	振动信号（传感器采集）
+	•	声音数据（麦克风采集）
+	•	图像数据（摄像头监测设备状态）
+	2.	数据预处理
+	•	XGBoost 数据处理
+	•	清理异常值、归一化、时间窗口划分
+	•	CNN 数据处理
+	•	振动信号转换为 时频图（Spectrogram）
+	•	语音信号转换为 Mel 频谱
+	3.	特征提取
+	•	XGBoost 处理结构化数据（历史数据、统计特征）
+	•	CNN 处理时频数据（自动提取关键特征）
+	4.	模型训练
+	•	CNN 提取特征
+	•	XGBoost 结合 CNN 输出进行故障分类
+	•	融合两者结果进行最终预测
+
+3. 数据处理与特征工程
+
+(1) 结构化数据预处理（XGBoost）
+	•	特征选取
+	•	传感器信号的均值、标准差、最大最小值
+	•	振动频谱的能量、峰值
+	•	温度、负载、历史故障记录
+	•	特征工程
+	•	Rolling Mean（滑动均值）：平滑数据
+	•	差分特征：监测时间变化趋势
+	•	FFT 变换：提取频率特征
+(2) 非结构化数据预处理（CNN）
+(a) 振动信号
+振动数据是时间序列数据，无法直接输入 CNN。需要将其转换为时频图：
+	1.	傅里叶变换（FFT） 提取频率分布
+	2.	短时傅里叶变换（STFT） 转换成 Spectrogram（时频图）
+	3.	对数变换 增强低频信号
+(b) 声音信号
+声音数据可以转换为Mel 频谱（类似于人耳的感知方式），CNN 可直接识别异常模式。
+
+4. 模型架构
+
+(1) CNN 处理振动信号
+import tensorflow as tf
+from tensorflow.keras import layers, models
+
+def create_cnn_model(input_shape):
+    model = models.Sequential([
+        layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
+        layers.MaxPooling2D((2, 2)),
+        layers.Conv2D(64, (3, 3), activation='relu'),
+        layers.MaxPooling2D((2, 2)),
+        layers.Flatten(),
+        layers.Dense(128, activation='relu'),
+        layers.Dense(10, activation='softmax') # 假设有10种故障类型
+    ])
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
+输出：
+	•	CNN 经过 Flatten 层，转换为高维特征向量
+	•	该特征向量将作为 XGBoost 的输入
+(2) XGBoost 处理结构化数据
+import xgboost as xgb
+
+# 训练 XGBoost 模型
+xgb_model = xgb.XGBClassifier(
+    objective="multi:softmax",
+    num_class=10, # 假设10种故障类型
+    n_estimators=100,
+    max_depth=5,
+    learning_rate=0.1
+)
+
+# 训练 XGBoost
+xgb_model.fit(x_train, y_train)
+
+(3) CNN + XGBoost 组合
+	1.	CNN 提取振动信号特征
+	•	CNN 输出一个 feature_vector
+	2.	XGBoost 使用 CNN 特征 + 结构化数据
+	•	XGBoost_input = [feature_vector + 传感器数据]
+	3.	最终分类
+	•	XGBoost 进行故障预测
+# CNN 提取特征
+cnn_features = cnn_model.predict(vibration_data)
+
+# 结合结构化数据
+final_input = np.concatenate([cnn_features, structured_data], axis=1)
+
+# XGBoost 预测
+predictions = xgb_model.predict(final_input)
+
+5. 方案优化
+
+(1) 数据增强
+	•	振动信号：添加随机噪声、时移
+	•	声音信号：改变频率、振幅
+
+(2) 超参数调优
+	•	CNN： 调整滤波器数量、池化方式
+	•	XGBoost： 调整 max_depth、learning_rate
+
+(3) 迁移学习
+	•	预训练 CNN，在不同设备上迁移
+
+6. 结论
+
+XGBoost + CNN 结合能够：
+✅ 同时处理结构化 + 非结构化数据
+✅ 提高异常检测准确率
+✅ 减少误报，提高维护效率
+
+在 电梯行业，这种方法可以用于：
+	•	电机异常检测
+	•	电梯门系统故障识别
+	•	震动信号分析
