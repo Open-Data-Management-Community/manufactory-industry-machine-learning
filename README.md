@@ -1,4 +1,19 @@
 # manufactory-industry-machine-learning
+制造业正在加速数字化转型，机器学习+工业互联网是未来的核心趋势。
+预测性维护（Predictive Maintenance）
+目标： 通过机器学习预测设备故障，减少停机时间和维护成本。
+应用：
+	•	故障预测：基于历史维护数据和实时传感器数据（振动、温度、电流等），预测设备何时可能发生故障。
+	•	剩余寿命预测（RUL, Remaining Useful Life）：使用时间序列分析（如LSTM、XGBoost）估计机器部件的剩余寿命，优化维护计划。
+
+
+供应链优化与需求预测
+目标： 通过数据分析优化库存管理、物流调度，提高供应链效率。
+应用：
+	•	库存优化：基于时间序列预测（ARIMA、LSTM）预测市场需求，减少库存积压或短缺。
+	•	供应链风险管理：利用异常检测技术监测供应链中的异常波动，如原材料价格波动、物流延误等。
+
+
 
 we are planning to have a serial of industry model of manufactory for sharing and accelerate maturity of foundation data in this traditional area.
 Machine learning (ML) is transforming the manufacturing industry by enabling data-driven decision-making, process automation, and predictive capabilities. With the integration of advanced sensors, IoT devices, and big data analytics, manufacturers can leverage ML algorithms to optimize production processes, enhance quality control, reduce operational costs, and improve overall efficiency.
